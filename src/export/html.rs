@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::fmt;
 use std::io::{Error, Result as IOResult, Write};
 
@@ -121,12 +122,19 @@ impl HtmlHandler<Error> for DefaultHtmlHandler {
             Element::Code { value } => write!(w, "<code>{}</code>", HtmlEscape(value))?,
             Element::FnRef(_fn_ref) => (),
             Element::InlineCall(_) => (),
-            Element::Link(link) => write!(
-                w,
-                "<a href=\"{}\">{}</a>",
-                HtmlEscape(&link.path),
-                HtmlEscape(link.desc.as_ref().unwrap_or(&link.path)),
-            )?,
+            Element::Link(link) => {
+                let link_type_str: Cow<str> = match link.link_type.as_ref() {
+                    Some(t) => format!("{}:", t).into(),
+                    None => "".into(),
+                };
+                write!(
+                    w,
+                    "<a href=\"{}{}\">{}</a>",
+                    HtmlEscape(link_type_str),
+                    HtmlEscape(&link.path),
+                    HtmlEscape(link.desc.as_ref().unwrap_or(&link.path)),
+                )?
+            }
             Element::Macros(_macros) => (),
             Element::RadioTarget => (),
             Element::Snippet(snippet) => {

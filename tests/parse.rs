@@ -1,5 +1,6 @@
 use orgize::Org;
 use pretty_assertions::assert_eq;
+use serde_json::to_string;
 
 macro_rules! test_suite {
     ($name:ident, $content:expr, $expected:expr) => {
@@ -7,6 +8,7 @@ macro_rules! test_suite {
         fn $name() {
             let mut writer = Vec::new();
             let org = Org::parse($content);
+            println!("{}", to_string(&org).unwrap());
             org.write_html(&mut writer).unwrap();
             let string = String::from_utf8(writer).unwrap();
             assert_eq!(string, $expected);
@@ -25,6 +27,12 @@ test_suite!(
     link,
     "Visit[[http://example.com][link1]]or[[http://example.com][link1]].",
     r#"<main><section><p>Visit<a href="http://example.com">link1</a>or<a href="http://example.com">link1</a>.</p></section></main>"#
+);
+
+test_suite!(
+    plain_link,
+    "Cite cite:foo_2019.",
+    r#"<main><section><p>Cite <a href="cite:foo_2019">foo_2019</a>.</p></section></main>"#
 );
 
 test_suite!(

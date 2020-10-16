@@ -499,17 +499,21 @@ pub fn parse_inline<'a, T: ElementArena<'a>>(
             }
             Some(tail)
         }
-        b's' => {
-            let (tail, inline_src) = InlineSrc::parse(contents)?;
-            arena.append(inline_src, parent);
-            Some(tail)
+        _ => {
+            if let Some((tail, inline_src)) = InlineSrc::parse(contents) {
+                arena.append(inline_src, parent);
+                return Some(tail);
+            }
+            if let Some((tail, inline_call)) = InlineCall::parse(contents) {
+                arena.append(inline_call, parent);
+                return Some(tail);
+            }
+            if let Some((tail, plain_link)) = Link::parse_plain(contents) {
+                arena.append(plain_link, parent);
+                return Some(tail);
+            }
+            None
         }
-        b'c' => {
-            let (tail, inline_call) = InlineCall::parse(contents)?;
-            arena.append(inline_call, parent);
-            Some(tail)
-        }
-        _ => None,
     }
 }
 
