@@ -5,3 +5,4 @@ Cargo.lock
 benches/*.org
 .gdb_history
 perf.data*
+/.envrc
